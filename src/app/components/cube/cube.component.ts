@@ -306,11 +306,15 @@ export class CubeComponent implements AfterViewInit {
         let newPhantomPosition: THREE.Vector3;
 
         let wallGeometry = <THREE.PlaneGeometry>wallPlane.geometry;
-        newPhantomPosition = wallGeometry.faces[0].normal
-          .clone()
-          .applyQuaternion(wallPlane.quaternion)
-          .multiplyScalar(0.1)
-          .add(center);
+        let positionAttribute = wallGeometry.getAttribute("position");
+        let normal = new THREE.Vector3();
+        normal.fromBufferAttribute(positionAttribute, 0); // Get the normal of the first vertex
+        newPhantomPosition = normal.clone().applyQuaternion(wallPlane.quaternion).multiplyScalar(0.1).add(center);
+        // newPhantomPosition = wallGeometry.faces[0].normal
+        //   .clone()
+        //   .applyQuaternion(wallPlane.quaternion)
+        //   .multiplyScalar(0.1)
+        //   .add(center);
 
         // phantomLine.position.x =  newPhantomPosition.x;
         // phantomLine.position.y = 0.5;
@@ -608,21 +612,21 @@ export class CubeComponent implements AfterViewInit {
               if (collisionResultsLine[0].distance < directionVectorLine.length() + 0.5) {
                 //точка на расстоянии 0.6 от стены -
                 this.magnitized = true; //включаем примагничивание
-                this.movement.obj.rotation.y = collisionResultsLine[0].object.rotation.y; //Вращаем Парраллелпипед гранью к стене
+                this.movement.obj.rotation.y = collisionResultsLine[0].object.rotation.y;
                 this.phantomMagnetLine.rotation.y = collisionResultsLine[0].object.rotation.y;
-                let offset = this.movement.obj.geometry.boundingBox.max.z + 0.005; //расстояние от центра движимого объекта до его края
-                let wallMgnet = <THREE.Mesh>collisionResultsLine[0].object; //Получили из результата объект явным указанием типа. Без этогоо тупой скрипт не понимает (2 часа потерянного времени)
-                let wallMgnetGeometry = <THREE.PlaneGeometry>wallMgnet.geometry; //Получили из объекто геометрию. Тоже явно указывая тупому скрипту тип.
-
-                let planeNormal: THREE.Vector3 = wallMgnetGeometry.faces[0].normal
-                  .clone()
-                  .applyQuaternion(wallMgnet.quaternion); //Взяли копию нормали плоскости и повернули ее на угол поворота плоскости
+                let offset = this.movement.obj.geometry.boundingBox.max.z + 0.005;
+                let wallMgnet = <THREE.Mesh>collisionResultsLine[0].object;
+                let wallMgnetGeometry = <THREE.PlaneGeometry>wallMgnet.geometry;
+                let positionAttribute = wallMgnetGeometry.getAttribute('position');
+                let normal = new THREE.Vector3();
+                normal.fromBufferAttribute(positionAttribute, 0); // Get the normal of the first vertex
+                let planeNormal: THREE.Vector3 = normal.clone().applyQuaternion(wallMgnet.quaternion);
+                // let planeNormal: THREE.Vector3 = wallMgnetGeometry.faces[0].normal
+                //   .clone()
+                //   .applyQuaternion(wallMgnet.quaternion);
                 let newPosition: THREE.Vector3 = collisionResultsLine[0].point
                   .clone()
-                  .add(planeNormal.clone().multiplyScalar(offset)); //скопировали передвигаемый объект в точку пересечения,
-                // прибавили к нему вектор нормали стены, умноженный на расстояние от центра движимого объекта до его края
-                // this.movement.obj.position.copy( collisionResultsLine[0].point.clone().add(planeNormal.clone().multiplyScalar(offset))); //скопировали передвигаемый объект в точку пересечения,
-                // если делать .copy(), то потом пересечения считаются неправильно, смещенно на величину offset
+                  .add(planeNormal.clone().multiplyScalar(offset));
                 this.movement.obj.position.x = newPosition.x;
                 this.movement.obj.position.z = newPosition.z;
               } else {
