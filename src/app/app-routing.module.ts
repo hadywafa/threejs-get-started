@@ -1,10 +1,14 @@
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { NgModule } from "@angular/core";
+import { RouterModule, Routes } from "@angular/router";
+import { GetStartedComponent } from "./components/get-started/get-started.component";
 
-const routes: Routes = [];
+const routes: Routes = [
+  { path: "", redirectTo : "get-started",pathMatch:"full" },
+  { path: "get-started", component: GetStartedComponent },
+];
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
 })
-export class AppRoutingModule { }
+export class AppRoutingModule {}
